@@ -1,27 +1,35 @@
 ﻿using EmployeeManagement.API.Entities;
 using EmployeeManagement.API.Entities.DTO;
 using EmployeeManagement.API.Enums;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Collections.Generic;
-using System.Security.Cryptography.X509Certificates;
-using System.Xml.Linq;
-using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
 
 namespace EmployeeManagement.API.Controllers
 {
+    /// <summary>
+    /// Các API liên quan đến nhân viên
+    /// </summary>
     [Route("api/v1/[controller]")]
     [ApiController]
     public class EmployeesController : ControllerBase
     {
+        /// <summary>
+        /// API lấy danh sách nhân viên theo điều kiện lọc và phân trang
+        /// </summary>
+        /// <param name="keyword">Từ khóa muốn tìm kiếm: Mã nhân viên(Code), tên nhân viên(Fullname), số điện thoại(PhoneNumber) </param>
+        /// <param name="jobPositionId">Id vị trí</param>
+        /// <param name="departmentId">Id phòng ban</param>
+        /// <param name="limit">Bản ghi muốn lấy </param>
+        /// <param name="offset">Vị trí bản ghi bắt đầu lấy</param>
+        /// <returns>
+        /// Trả về đối tượng PagingResult,và danh sách sinh viên trên một trang & tổng số bản ghi thỏa mãn điều kiện
+        /// </returns>
         [HttpGet]
         public PagingResult GetPaging(
-            [FromQuery] string? keyword,
-            [FromQuery] Guid JobPositionId,
-            [FromQuery] Guid DepartmentId,
-            [FromQuery] int Limit,
-            [FromQuery] int Offset)
+            [FromQuery] string keyword,
+            [FromQuery] Guid jobPositionId,
+            [FromQuery] Guid departmentId,
+            [FromQuery] int limit,
+            [FromQuery] int offset)
         {
             return new PagingResult
             {
@@ -38,7 +46,7 @@ namespace EmployeeManagement.API.Controllers
                         Email = "hoangtuan@gmail.com",
                         JobPositionId = Guid.NewGuid(),
                         DepartmentId = Guid.NewGuid(),
-                        Salary = 0,
+                        Salary = 3440,
                         WorkStatus = WorkStatus.TrialJob,
                         IdentityNumber = "88888888",
                         IdentityIssuerDate = new DateTime(2016,3,12),
@@ -84,7 +92,7 @@ namespace EmployeeManagement.API.Controllers
                         WorkStatus = WorkStatus.TrialJob,
                         IdentityNumber = "88888888",
                         IdentityIssuerDate = new DateTime(2016,3,12),
-                        IdentityIssuerPlace = "Lào Cai",
+                        IdentityIssuerPlace = "Ba vì",
                         TaxCode = "5555",
                         JoiningDate = new DateTime(2019,3,12),
                     }
@@ -94,12 +102,6 @@ namespace EmployeeManagement.API.Controllers
 
 
             };
-            if (!string.IsNullOrEmpty(keyword))
-            {
-                employees = employees.Where(e => e.Code.Contains(keyword) || e.Fullname.Contains(keyword)).ToList();
-            }
-            return new PagingResult();
-            
         }
     }
 }
