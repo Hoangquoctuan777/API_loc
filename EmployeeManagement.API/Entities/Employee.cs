@@ -8,17 +8,17 @@ namespace EmployeeManagement.API.Entities
     public class Employee
     {
         /// <summary>
-        /// Id nhân viên
+        /// Id nhân viên (Khóa chính)
         /// </summary>
         public Guid Id { get; set; }
        /// <summary>
        /// Mã nhân viên
        /// </summary>
-        public string? Code { get; set; }
+        public string Code { get; set; }
         /// <summary>
         /// Tên nhân viên
         /// </summary>
-        public string? Fullname { get; set; }
+        public string Fullname { get; set; }
         /// <summary>
         /// Giới tính
         /// </summary>
@@ -30,11 +30,11 @@ namespace EmployeeManagement.API.Entities
         /// <summary>
         /// Số điện thoại
         /// </summary>
-        public string? PhoneNumber { get; set; }
+        public string PhoneNumber { get; set; }
         /// <summary>
         /// Thư điện tử
         /// </summary>
-        public string? Email { get; set; }
+        public string Email { get; set; }
         /// <summary>
         /// Vị trí, chức vụ
         /// </summary>
@@ -54,7 +54,7 @@ namespace EmployeeManagement.API.Entities
         /// <summary>
         /// Số CCCD
         /// </summary>
-        public string? IdentityNumber { get; set; }
+        public string IdentityNumber { get; set; }
         /// <summary>
         /// Ngày cấp CCCD
         /// </summary>
@@ -62,11 +62,11 @@ namespace EmployeeManagement.API.Entities
         /// <summary>
         /// Nơi cấp CCCD
         /// </summary>
-        public string? IdentityIssuerPlace { get; set; }
+        public string IdentityIssuerPlace { get; set; }
         /// <summary>
         /// Mã số thuế
         /// </summary>
-        public string? TaxCode { get; set; }
+        public string TaxCode { get; set; }
        /// <summary>
        /// Ngày gia nhập công ty
        /// </summary>
