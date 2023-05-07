@@ -18,7 +18,7 @@ namespace EmployeeManagement.API.Entities
         /// <summary>
         /// Tên nhân viên
         /// </summary>
-        public string Fullname { get; set; }
+        public string FullName { get; set; }
         /// <summary>
         /// Giới tính
         /// </summary>

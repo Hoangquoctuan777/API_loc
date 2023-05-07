@@ -1,11 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "Mi0VBm60wi50KZ6Ik8on/raCEEA6mdBbo6cwyP25yIpbVIGY4/04PbVAMZoB8G6OVnS6GMIXKYd2i5kUoaVM2Q==",
+  "dgSpecHash": "tzdw8nvl5tRTnUKBT+m4r0LzeVyCJFr275iu0AG8E/BGC0tjoG50hbzmK+M/QjgtW0E5ihk/Q5gkvbeF+0S6sQ==",
   "success": true,
   "projectFilePath": "E:\\api\\EmployeeManagement\\EmployeeManagement.API\\EmployeeManagement.API.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\hqtua\\.nuget\\packages\\dapper\\2.0.123\\dapper.2.0.123.nupkg.sha512",
     "C:\\Users\\hqtua\\.nuget\\packages\\microsoft.extensions.apidescription.server\\3.0.0\\microsoft.extensions.apidescription.server.3.0.0.nupkg.sha512",
     "C:\\Users\\hqtua\\.nuget\\packages\\microsoft.openapi\\1.2.3\\microsoft.openapi.1.2.3.nupkg.sha512",
+    "C:\\Users\\hqtua\\.nuget\\packages\\mysqlconnector\\2.2.6\\mysqlconnector.2.2.6.nupkg.sha512",
     "C:\\Users\\hqtua\\.nuget\\packages\\swashbuckle.aspnetcore\\6.2.3\\swashbuckle.aspnetcore.6.2.3.nupkg.sha512",
     "C:\\Users\\hqtua\\.nuget\\packages\\swashbuckle.aspnetcore.swagger\\6.2.3\\swashbuckle.aspnetcore.swagger.6.2.3.nupkg.sha512",
     "C:\\Users\\hqtua\\.nuget\\packages\\swashbuckle.aspnetcore.swaggergen\\6.2.3\\swashbuckle.aspnetcore.swaggergen.6.2.3.nupkg.sha512",

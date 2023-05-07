@@ -30,3 +30,5 @@ E:\api\EmployeeManagement\EmployeeManagement.API\obj\Debug\net6.0\refint\Employe
 E:\api\EmployeeManagement\EmployeeManagement.API\obj\Debug\net6.0\EmployeeManagement.API.pdb
 E:\api\EmployeeManagement\EmployeeManagement.API\obj\Debug\net6.0\EmployeeManagement.API.genruntimeconfig.cache
 E:\api\EmployeeManagement\EmployeeManagement.API\obj\Debug\net6.0\ref\EmployeeManagement.API.dll
+E:\api\EmployeeManagement\EmployeeManagement.API\bin\Debug\net6.0\Dapper.dll
+E:\api\EmployeeManagement\EmployeeManagement.API\bin\Debug\net6.0\MySqlConnector.dll
