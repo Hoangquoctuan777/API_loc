@@ -122,6 +122,7 @@ namespace EmployeeManagement.API.Controllers
             try
             {
                 //Chuẩn bị tên stored procedure
+
                 string storedProcedureName = "Proc_Employee_GetById";
 
                 //Chuẩn bị tham số đầu vào cho stored
@@ -193,7 +194,7 @@ namespace EmployeeManagement.API.Controllers
                 {
                     //Lấy tên thuộc tính
                     string propertyName = property.Name;
-
+                    //Kiểm tra xem thuộc tính đó có attribute required hay không
                     var requiredAttribute = (RequiredAttribute)property.GetCustomAttributes(typeof(RequiredAttribute), false).FirstOrDefault();
                     if(requiredAttribute != null)
                     {
@@ -202,7 +203,7 @@ namespace EmployeeManagement.API.Controllers
                             validateFailures.Add(requiredAttribute.ErrorMessage);
                         }
                     }
-
+                    //Kiểm tra xem thuộc tính đó có attribute MaxLength hay không
                     var maxlengthAttribute = (MaxLengthAttribute)property.GetCustomAttributes(typeof(MaxLengthAttribute), false).FirstOrDefault();
                     if(maxlengthAttribute != null)
                     {
@@ -211,7 +212,7 @@ namespace EmployeeManagement.API.Controllers
                             validateFailures.Add(maxlengthAttribute.ErrorMessage);
                         }
                     }
-
+                    //Kiểm tra xem thuộc tính đó có attribute EmailAddress hay không
                     var emailAddressAttribute = (EmailAddressAttribute)property.GetCustomAttributes(typeof(EmailAddressAttribute), false).FirstOrDefault();
                     if (emailAddressAttribute != null)
                     {
@@ -220,9 +221,6 @@ namespace EmployeeManagement.API.Controllers
                             validateFailures.Add(emailAddressAttribute.ErrorMessage);
                         }
                     }
-
-
-
                 }
                 if(validateFailures.Count > 0)
                 {
@@ -314,7 +312,7 @@ namespace EmployeeManagement.API.Controllers
                 {
                     //Lấy tên thuộc tính
                     string propertyName = property.Name;
-
+                    //Kiểm tra xem thuộc tính đó có attribute required hay không
                     var requiredAttribute = (RequiredAttribute)property.GetCustomAttributes(typeof(RequiredAttribute), false).FirstOrDefault();
                     if (requiredAttribute != null)
                     {
@@ -323,7 +321,7 @@ namespace EmployeeManagement.API.Controllers
                             validateFailures.Add(requiredAttribute.ErrorMessage);
                         }
                     }
-
+                    //Kiểm tra xem thuộc tính đó có attribute MaxLength hay không
                     var maxlengthAttribute = (MaxLengthAttribute)property.GetCustomAttributes(typeof(MaxLengthAttribute), false).FirstOrDefault();
                     if (maxlengthAttribute != null)
                     {
@@ -332,7 +330,7 @@ namespace EmployeeManagement.API.Controllers
                             validateFailures.Add(maxlengthAttribute.ErrorMessage);
                         }
                     }
-
+                    //Kiểm tra xem thuộc tính đó có attribute EmailAddress hay không
                     var emailAddressAttribute = (EmailAddressAttribute)property.GetCustomAttributes(typeof(EmailAddressAttribute), false).FirstOrDefault();
                     if (emailAddressAttribute != null)
                     {
@@ -379,7 +377,6 @@ namespace EmployeeManagement.API.Controllers
                 // Thêm các tham số khác tùy thuộc vào thông tin cần cập nhật
 
                 // Khởi tạo kết nối tới Database	
-
                 var mySqlConnection = new MySqlConnection(DatabaseContext.ConnectionString);
 
                 // Thực hiện gọi vào Database để chạy stored procedure
