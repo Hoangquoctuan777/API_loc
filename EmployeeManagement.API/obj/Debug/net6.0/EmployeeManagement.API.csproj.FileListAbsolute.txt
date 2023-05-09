@@ -32,3 +32,5 @@ E:\api\EmployeeManagement\EmployeeManagement.API\obj\Debug\net6.0\EmployeeManage
 E:\api\EmployeeManagement\EmployeeManagement.API\obj\Debug\net6.0\ref\EmployeeManagement.API.dll
 E:\api\EmployeeManagement\EmployeeManagement.API\bin\Debug\net6.0\Dapper.dll
 E:\api\EmployeeManagement\EmployeeManagement.API\bin\Debug\net6.0\MySqlConnector.dll
+E:\api\EmployeeManagement\EmployeeManagement.API\obj\Debug\net6.0\EmployeeManagement.API.Resource.resources
+E:\api\EmployeeManagement\EmployeeManagement.API\obj\Debug\net6.0\EmployeeManagement.API.csproj.GenerateResource.cache

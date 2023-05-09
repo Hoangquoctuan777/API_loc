@@ -4,8 +4,10 @@ using EmployeeManagement.API.Entities.DTO;
 using EmployeeManagement.API.Enums;
 using Microsoft.AspNetCore.Mvc;
 using MySqlConnector;
+using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Diagnostics.Eventing.Reader;
+using System.Reflection;
 using System.Reflection.Metadata;
 
 namespace EmployeeManagement.API.Controllers
@@ -127,8 +129,7 @@ namespace EmployeeManagement.API.Controllers
                 parameters.Add("p_Id", employeeId);
 
                 //Khởi tạo kết nối tới Database	
-                string connectionString = "Server=localhost;Port=3306;Database=employeemanagement;Uid=root;Pwd=admin;";
-                var mySqlConnection = new MySqlConnection(connectionString);
+                var mySqlConnection = new MySqlConnection(DatabaseContext.ConnectionString);
 
                 //Thực hiện gọi vào Database để chạy stored procedure
                 var employee = mySqlConnection.QueryFirstOrDefault<Employee>(storedProcedureName, parameters, commandType: System.Data.CommandType.StoredProcedure);
@@ -149,11 +150,11 @@ namespace EmployeeManagement.API.Controllers
             {
 
                 Console.WriteLine(ex.Message);
-                return StatusCode(StatusCodes.Status500InternalServerError, new
+                return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResult
                 {
-                    ErrorCode = 1,
-                    DevMsg = "Catched an exception",
-                    UseMsg = "Có lỗi xảy ra vui lòng liên hệ trung tâm tư vấn",
+                    ErrorCode = Enums.ErrorCode.Exception,
+                    DevMsg = Resource.DevMsg_Exception,
+                    UserMsg = Resource.UserMsg_Exception,
                     MoreInfo = "https://google.com",
                     TraceId = HttpContext.TraceIdentifier
                 });
@@ -180,9 +181,117 @@ namespace EmployeeManagement.API.Controllers
         [HttpPost]  
         public  IActionResult InsertEmployee([FromBody]Employee newEmployee )
         {
-            return StatusCode(StatusCodes.Status201Created, Guid.NewGuid());
+            try
+            {
+                //Validate đầu vào
+                //Lấy danh sách thuộc tính của class Employee
+                var properties = typeof(Employee).GetProperties();
+                //Khai báo mảng các lỗi
+                var validateFailures = new List<string>();
+                //Chạy vòng lặp Foreach đi qua các thuộc tính 
+                foreach ( var property in properties )
+                {
+                    //Lấy tên thuộc tính
+                    string propertyName = property.Name;
+
+                    var requiredAttribute = (RequiredAttribute)property.GetCustomAttributes(typeof(RequiredAttribute), false).FirstOrDefault();
+                    if(requiredAttribute != null)
+                    {
+                        if (String.IsNullOrEmpty(property.GetValue(newEmployee).ToString()))
+                        {
+                            validateFailures.Add(requiredAttribute.ErrorMessage);
+                        }
+                    }
+
+                    var maxlengthAttribute = (MaxLengthAttribute)property.GetCustomAttributes(typeof(MaxLengthAttribute), false).FirstOrDefault();
+                    if(maxlengthAttribute != null)
+                    {
+                        if(property.GetValue(newEmployee).ToString().Length > maxlengthAttribute.Length)
+                        {
+                            validateFailures.Add(maxlengthAttribute.ErrorMessage);
+                        }
+                    }
+
+                    var emailAddressAttribute = (EmailAddressAttribute)property.GetCustomAttributes(typeof(EmailAddressAttribute), false).FirstOrDefault();
+                    if (emailAddressAttribute != null)
+                    {
+                        if (String.IsNullOrEmpty(property.GetValue(newEmployee)?.ToString()))
+                        {
+                            validateFailures.Add(emailAddressAttribute.ErrorMessage);
+                        }
+                    }
+
+
+
+                }
+                if(validateFailures.Count > 0)
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, new ErrorResult
+                    {
+                        ErrorCode = Enums.ErrorCode.InvaledData,
+                        DevMsg = Resource.DevMsg_InvaledData,
+                        UserMsg = Resource.UserMsg_InvaledData,
+                        MoreInfo = validateFailures,
+                        TraceId = HttpContext.TraceIdentifier
+                    });
+                }
+
+
+                //Chuẩn bị tên stored procedure
+                string storedProcedure = "Proc_Employee_Insert";
+                //Chuẩn bị tham số đầu vào cho stored
+                var newId = Guid.NewGuid();
+                var parameters = new DynamicParameters();
+                parameters.Add("p_Id", newId);
+                parameters.Add("p_Code", newEmployee.Code);
+                parameters.Add("p_FullName", newEmployee.FullName);
+                parameters.Add("p_Gender", newEmployee.Gender);
+                parameters.Add("p_DateOfBirth", newEmployee.DateOfBirth);
+                parameters.Add("p_PhoneNumber", newEmployee.PhoneNumber);
+                parameters.Add("p_Email", newEmployee.Email);
+                parameters.Add("p_JobPositionID", newEmployee.JobPositionId);
+                parameters.Add("p_DepartmentID", newEmployee.DepartmentId);
+                parameters.Add("p_Salary", newEmployee.Salary);
+                parameters.Add("p_WorkStatus", newEmployee.WorkStatus);
+                parameters.Add("p_IdentityNumber", newEmployee.IdentityNumber);
+                parameters.Add("p_IdentityIssuerDate", newEmployee.IdentityIssuerDate);
+                parameters.Add("p_IdentityIssuerPlace", newEmployee.IdentityIssuerPlace);
+                parameters.Add("p_TaxCode", newEmployee.TaxCode);
+                parameters.Add("p_JoiningDate", newEmployee.JoiningDate);
+
+                //Khởi tạo kết nối database
+                var mySqlConnection = new MySqlConnection(DatabaseContext.ConnectionString);
+                //Thực hiện gọi vào database để chạy stored procdure
+                int numberOfAffectedRows = mySqlConnection.Execute(storedProcedure, parameters, commandType: System.Data.CommandType.StoredProcedure);
+                if (numberOfAffectedRows == 1)
+                {
+                    return StatusCode(StatusCodes.Status201Created, newId);
+                }
+                return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResult
+                {
+                    ErrorCode = Enums.ErrorCode.DatabaseFailed,
+                    DevMsg = Resource.DevMsg_DatabaseFailed,
+                    UserMsg = Resource.UserMsg_DatabaseFailed,
+                    MoreInfo = "https://google.com",
+                    TraceId = HttpContext.TraceIdentifier
+                });
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine(ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResult
+                {
+                    ErrorCode = Enums.ErrorCode.Exception,
+                    DevMsg = Resource.DevMsg_Exception,
+                    UserMsg = Resource.UserMsg_Exception,
+                    MoreInfo = "https://google.com",
+                    TraceId = HttpContext.TraceIdentifier
+                });
+            }
+
         }
-        
+
         /// <summary>
         /// API sửa nhân viên
         /// </summary>
@@ -194,47 +303,109 @@ namespace EmployeeManagement.API.Controllers
         {
             try
             {
+
+                //Validate đầu vào
+                //Lấy danh sách thuộc tính của class Employee
+                var properties = typeof(Employee).GetProperties();
+                //Khai báo mảng các lỗi
+                var validateFailures = new List<string>();
+                //Chạy vòng lặp Foreach đi qua các thuộc tính 
+                foreach (var property in properties)
+                {
+                    //Lấy tên thuộc tính
+                    string propertyName = property.Name;
+
+                    var requiredAttribute = (RequiredAttribute)property.GetCustomAttributes(typeof(RequiredAttribute), false).FirstOrDefault();
+                    if (requiredAttribute != null)
+                    {
+                        if (string.IsNullOrEmpty(property.GetValue(updateEmployee).ToString()))
+                        {
+                            validateFailures.Add(requiredAttribute.ErrorMessage);
+                        }
+                    }
+
+                    var maxlengthAttribute = (MaxLengthAttribute)property.GetCustomAttributes(typeof(MaxLengthAttribute), false).FirstOrDefault();
+                    if (maxlengthAttribute != null)
+                    {
+                        if (property.GetValue(updateEmployee).ToString().Length > maxlengthAttribute.Length)
+                        {
+                            validateFailures.Add(maxlengthAttribute.ErrorMessage);
+                        }
+                    }
+
+                    var emailAddressAttribute = (EmailAddressAttribute)property.GetCustomAttributes(typeof(EmailAddressAttribute), false).FirstOrDefault();
+                    if (emailAddressAttribute != null)
+                    {
+                        if (string.IsNullOrEmpty(property.GetValue(updateEmployee).ToString()))
+                        {
+                            validateFailures.Add(emailAddressAttribute.ErrorMessage);
+                        }
+                    }
+                }
+                if (validateFailures.Count > 0)
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, new ErrorResult
+                    {
+                        ErrorCode = Enums.ErrorCode.InvaledData,
+                        DevMsg = Resource.DevMsg_InvaledData,
+                        UserMsg = Resource.UserMsg_InvaledData,
+                        MoreInfo = validateFailures,
+                        TraceId = HttpContext.TraceIdentifier
+                    });
+                }
+
                 // Chuẩn bị tên stored procedure
                 string storedProcedureName = "Proc_Employee_Update";
 
                 // Chuẩn bị tham số đầu vào cho stored procedure
                 var parameters = new DynamicParameters();
                 parameters.Add("p_Id", employeeId);
-                //parameters.Add("p_Code", updateEmployee.Code);
-                //parameters.Add("p_FullName", updateEmployee.FullName);
-                //parameters.Add("p_Gender", updateEmployee.Gender);
-                //parameters.Add("p_DateOfBirth", updateEmployee.DateOfBirth);
-                //parameters.Add("p_PhoneNumber", updateEmployee.PhoneNumber);
-                //parameters.Add("p_Email", updateEmployee.Email);
-                //parameters.Add("p_JobPositionId", updateEmployee.JobPositionId);
-                //parameters.Add("p_DepartmentId", updateEmployee.DepartmentId);
-                //parameters.Add("p_Salary", updateEmployee.Salary);
-                //parameters.Add("p_WorkStatus", updateEmployee.WorkStatus);
-                //parameters.Add("p_IdentityNumber", updateEmployee.IdentityNumber);
-                //parameters.Add("p_IdentityIssuerDate", updateEmployee.IdentityIssuerDate);
-                //parameters.Add("p_IdentityIssuerPlace", updateEmployee.IdentityIssuerPlace);
-                //parameters.Add("p_TaxCode", updateEmployee.TaxCode);
-                //parameters.Add("p_JoiningDate", updateEmployee.JoiningDate);
+                parameters.Add("p_Code", updateEmployee.Code);
+                parameters.Add("p_FullName", updateEmployee.FullName);
+                parameters.Add("p_Gender", updateEmployee.Gender);
+                parameters.Add("p_DateOfBirth", updateEmployee.DateOfBirth);
+                parameters.Add("p_PhoneNumber", updateEmployee.PhoneNumber);
+                parameters.Add("p_Email", updateEmployee.Email);
+                parameters.Add("p_JobPositionId", updateEmployee.JobPositionId);
+                parameters.Add("p_DepartmentId", updateEmployee.DepartmentId);
+                parameters.Add("p_Salary", updateEmployee.Salary);
+                parameters.Add("p_WorkStatus", updateEmployee.WorkStatus);
+                parameters.Add("p_IdentityNumber", updateEmployee.IdentityNumber);
+                parameters.Add("p_IdentityIssuerDate", updateEmployee.IdentityIssuerDate);
+                parameters.Add("p_IdentityIssuerPlace", updateEmployee.IdentityIssuerPlace);
+                parameters.Add("p_TaxCode", updateEmployee.TaxCode);
+                parameters.Add("p_JoiningDate", updateEmployee.JoiningDate);
 
                 // Thêm các tham số khác tùy thuộc vào thông tin cần cập nhật
 
                 // Khởi tạo kết nối tới Database	
-                string connectionString = "Server=localhost;Port=3306;Database=employeemanagement;Uid=root;Pwd=admin;";
-                var mySqlConnection = new MySqlConnection(connectionString);
+
+                var mySqlConnection = new MySqlConnection(DatabaseContext.ConnectionString);
 
                 // Thực hiện gọi vào Database để chạy stored procedure
                var employee = mySqlConnection.Execute(storedProcedureName, parameters, commandType: CommandType.StoredProcedure);
+                if(employeeId != null)
+                {
+                    return Ok(employeeId); // Trả về phản hồi HTTP 200 No Content nếu sửa thành công
+                }
+                return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResult
+                {
+                    ErrorCode = Enums.ErrorCode.DatabaseFailed,
+                    DevMsg = Resource.DevMsg_DatabaseFailed,
+                    UserMsg = Resource.UserMsg_DatabaseFailed,
+                    MoreInfo = "https://google.com",
+                    TraceId = HttpContext.TraceIdentifier
+                });
 
-                return Ok(employee); // Trả về phản hồi HTTP 204 No Content nếu sửa thành công
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return StatusCode(StatusCodes.Status500InternalServerError, new
+                return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResult
                 {
-                    ErrorCode = 1,
-                    DevMsg = "Catched an exception",
-                    UseMsg = "Có lỗi xảy ra, vui lòng liên hệ trung tâm tư vấn",
+                    ErrorCode = Enums.ErrorCode.Exception,
+                    DevMsg = Resource.DevMsg_Exception,
+                    UserMsg = Resource.UserMsg_Exception,
                     MoreInfo = "https://google.com",
                     TraceId = HttpContext.TraceIdentifier
                 });
@@ -259,30 +430,39 @@ namespace EmployeeManagement.API.Controllers
                 parameters.Add("p_Id", employeeId);
 
                 //Khởi tạo kết nối tới Database	
-                string connectionString = "Server=localhost;Port=3306;Database=employeemanagement;Uid=root;Pwd=admin;";
-                var mySqlConnection = new MySqlConnection(connectionString);
+                
+                var mySqlConnection = new MySqlConnection(DatabaseContext.ConnectionString);
 
                 //Thực hiện gọi vào Database để chạy stored procedure
-                var employee = mySqlConnection.Execute(storedProcedureName, parameters, commandType: System.Data.CommandType.StoredProcedure);
+                int numberOfAffectedRows = mySqlConnection.Execute(storedProcedureName, parameters, commandType: System.Data.CommandType.StoredProcedure);
 
                 //Xử lý kết quả trả về 
-                if (employee == 0)
+                if (numberOfAffectedRows == 1)
                 {
-                    return NotFound(); // Trả về phản hồi HTTP 404 Not Found nếu không tìm thấy nhân viên
+                    return Ok(employeeId); // Trả về phản hồi HTTP 200 và id vừa xóa nếu xóa thành công
                 }
+                return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResult
+                {
+                    ErrorCode = Enums.ErrorCode.DatabaseFailed,
+                    DevMsg = Resource.DevMsg_DatabaseFailed,
+                    UserMsg = Resource.UserMsg_DatabaseFailed,
+                    MoreInfo = "https://google.com",
+                    TraceId = HttpContext.TraceIdentifier
 
-                return Ok(employeeId); // Trả về phản hồi HTTP 200 và id vừa xóa nếu xóa thành công
+                });
+
+               
 
             }
             catch (Exception ex)
             {
 
                 Console.WriteLine(ex.Message);
-                return StatusCode(StatusCodes.Status500InternalServerError, new
+                return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResult
                 {
-                    ErrorCode = 1,
-                    DevMsg = "Catched an exception",
-                    UseMsg = "Có lỗi xảy ra vui lòng liên hệ trung tâm tư vấn",
+                    ErrorCode = Enums.ErrorCode.Exception,
+                    DevMsg = Resource.DevMsg_Exception,
+                    UserMsg = Resource.UserMsg_Exception,
                     MoreInfo = "https://google.com",
                     TraceId = HttpContext.TraceIdentifier
                 });
