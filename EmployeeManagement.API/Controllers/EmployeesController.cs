@@ -38,77 +38,45 @@ namespace EmployeeManagement.API.Controllers
             [FromQuery] int limit = 10,
             [FromQuery] int offset = 0)
         {
-            return Ok( new PagingResult
+            try
             {
-                Data = new List<object>
+                // Chuẩn bị tên stored procedure 
+                String storedProcedureName = "Proc_employee_GetPaging";
+                // Chuẩn bị tham số đầu vào cho stored 
+                var parameters = new DynamicParameters();
+                parameters.Add("p_Keyword", keyword);
+                parameters.Add("p_JobPositionId", jobPositionId);
+                parameters.Add("p_DepartmentId", departmentId);
+                parameters.Add("p_Limit", limit);
+                parameters.Add("p_Offset", offset);
+
+                // Khởi tạo kết nối tới Database
+                var mySqlConnection = new MySqlConnection(DatabaseContext.ConnectionString);
+                // Thực hiện gọi vào Database để chạy stored procedure
+                var multipleResultSets = mySqlConnection.QueryMultiple(storedProcedureName, parameters, commandType: System.Data.CommandType.StoredProcedure);
+                var employees = multipleResultSets.Read<object>().ToList();
+                int totalRecords = multipleResultSets.Read<int>().FirstOrDefault();
+
+                return Ok(new PagingResult
                 {
-                    new Employee
-                    {
-                        Id = Guid.NewGuid(),
-                        Code = "NV001",
-                        FullName = "Nguyên Văn A",
-                        Gender = Gender.Male,
-                        DateOfBirth = new DateTime(2003,1,2),
-                        PhoneNumber = "99999999",
-                        Email = "nguyenvana@gmail.com",
-                        JobPositionId = Guid.NewGuid(),
-                        DepartmentId = Guid.NewGuid(),
-                        Salary = 3440,
-                        WorkStatus = WorkStatus.TrialJob,
-                        IdentityNumber = "88888888",
-                        IdentityIssuerDate = new DateTime(2016,3,12),
-                        IdentityIssuerPlace = "Hà Nội",
-                        TaxCode = "5555",
-                        JoiningDate = new DateTime(2019,3,12),
+                    Data = employees,
+                    TotalRecords = totalRecords
+                });
+            }
+            catch (Exception ex)
+            {
 
-                    },
+                Console.WriteLine(ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResult
+                {
+                    ErrorCode = Enums.ErrorCode.Exception,
+                    DevMsg = Resource.DevMsg_Exception,
+                    UserMsg = Resource.UserMsg_Exception,
+                    MoreInfo = "https://google.com",
+                    TraceId = HttpContext.TraceIdentifier
+                });
 
-                    new Employee
-                    {
-                        Id = Guid.NewGuid(),
-                        Code = "NV002",
-                        FullName = "Phạm Tuấn Duy",
-                        Gender = Gender.Female,
-                        DateOfBirth = new DateTime(2003,3,12),
-                        PhoneNumber = "99999999",
-                        Email = "tuanduy@gmail.com",
-                        JobPositionId = Guid.NewGuid(),
-                        DepartmentId = Guid.NewGuid(),
-                        Salary = 0,
-                        WorkStatus = WorkStatus.TrialJob,
-                        IdentityNumber = "88888888",
-                        IdentityIssuerDate = new DateTime(2017,3,12),
-                        IdentityIssuerPlace = "Thái Bình",
-                        TaxCode = "5555",
-                        JoiningDate = new DateTime(2019,3,12),
-
-                    },
-
-                    new Employee
-                    {
-                        Id = Guid.NewGuid(),
-                        Code = "NV003",
-                        FullName = "Phùng Văn Đức",
-                        Gender = Gender.Male,
-                        DateOfBirth =  new DateTime(2002,3,12),
-                        PhoneNumber = "99999999",
-                        Email = "vanduc@gmail.com",
-                        JobPositionId = Guid.NewGuid(),
-                        DepartmentId = Guid.NewGuid(),
-                        Salary = 0,
-                        WorkStatus = WorkStatus.TrialJob,
-                        IdentityNumber = "88888888",
-                        IdentityIssuerDate = new DateTime(2016,3,12),
-                        IdentityIssuerPlace = "Ba vì",
-                        TaxCode = "5555",
-                        JoiningDate = new DateTime(2019,3,12),
-                    }
-
-                },
-                TotalRecords = 3
-
-
-            });
+            }
         }
 
         /// <summary>
