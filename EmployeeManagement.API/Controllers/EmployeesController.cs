@@ -33,8 +33,8 @@ namespace EmployeeManagement.API.Controllers
         [HttpGet]
         public IActionResult GetPaging(
             [FromQuery] string? keyword,
-            [FromQuery] Guid jobPositionId,
-            [FromQuery] Guid departmentId,
+            [FromQuery] Guid? jobPositionId,
+            [FromQuery] Guid? departmentId,
             [FromQuery] int limit = 10,
             [FromQuery] int offset = 0)
         {
